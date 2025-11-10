@@ -71,7 +71,7 @@ paths:
                   value:
                     statusCode: 200
                     data:
-                      url: "https://staging-mobipurse-app.payfusion.io/checkouts/DMBC20251110154056OSPHM"
+                      url: "https://staging.mobipurse.com/checkouts/DMBC20251110154056OSPHM"
                       reference: "DMBC20251110154056OSPHM"
                       merchantsReference: "DMBC20251110154056OSPHM"
                       amount: 200000
@@ -581,8 +581,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             statusCode: 400
-            message: "Invalid request parameters"
-            error: "Bad Request"
+            error: "Invalid request parameters"
 
     Unauthorized:
       description: Unauthorized - Invalid or missing API key
@@ -592,8 +591,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             statusCode: 401
-            message: "Invalid API key"
-            error: "Unauthorized"
+            error: "Invalid API key"
 
     NotFound:
       description: Resource not found
@@ -603,8 +601,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             statusCode: 404
-            message: "Resource not found"
-            error: "Not Found"
+            error: "Resource not found"
 
     Conflict:
       description: Conflict - Duplicate reference
@@ -614,8 +611,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             statusCode: 409
-            message: "A disbursement with this reference already exists"
-            error: "Conflict"
+            error: "A disbursement with this reference already exists"
 
     UnprocessableEntity:
       description: Unprocessable entity - Validation failed
@@ -625,8 +621,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             statusCode: 422
-            message: "Invalid phone number format"
-            error: "Unprocessable Entity"
+            error: "Invalid phone number format"
 
     InternalServerError:
       description: Internal server error
@@ -636,5 +631,4 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             statusCode: 500
-            message: "An unexpected error occurred"
             error: "Internal Server Error"
