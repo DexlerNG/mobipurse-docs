@@ -1,0 +1,88 @@
+---
+title: "Checkout/Collection"
+---
+
+The Mobipurse checkout page allows customers to complete their purchases securely. Here is how it works:
+
+- From your infrastructure/application, call our Generate Checkout URL Endpoint with the payment details.
+- We will provide you with a link to a payment page, which you can then redirect your customer to in order to complete the payment process.
+- Once the transaction is complete, we will redirect the customer back to your specified URL.
+
+## 1. Get all the payment details
+
+First, you need to assemble the payment details. Here are the details you'll need:
+
+| Field         | Type   | Description                                                                                                              | Required |
+|---------------|--------|--------------------------------------------------------------------------------------------------------------------------|----------|
+| `amount`      | Number | This is the amount to charge the customer. This should be in the lowest currency denomination (e.g., 200000 for 2000.00) | True     |
+| `currency`    | String | This specifies the currency in which you would like to charge (e.g., "XOF", "USD", "NGN")                                | True     |
+| `country`     | String | This is the 2-character country code for the country (e.g., "CI" for Côte d'Ivoire, "NG" for Nigeria)                    | True     |
+| `webhookURL`  | String | This is a URL where we will send the payment event notifications. Highly recommended for tracking payment status         | False    |
+| `redirectURL` | String | The URL to which the customer should be redirected after the payment is completed                                        | False    |
+
+## 2. Call the endpoint to generate a checkout URL
+
+Next, in order to initiate the payment process, you will need to call our Generate Checkout URL API and provide the collected payment details. Please ensure that you authorize the API call using your `x-api-key` header.
+
+### API Endpoints
+
+**Sandbox (Testing):**
+[https://staging-api.mobipurse.com/mobipurse/v1/checkouts](https://staging-api.mobipurse.com/mobipurse/v1/checkouts)
+**Production:**
+[https://api.mobipurse.com/mobipurse/v1/checkouts](https://api.mobipurse.com/mobipurse/v1/checkouts)
+
+
+### Request Headers
+
+| Header              | Description                                           | Required |
+|---------------------|-------------------------------------------------------|----------|
+| `x-api-key`         | Your Mobipurse API key from the dashboard             | True     |
+
+### Example Request
+```shell
+curl --location 'https://staging-api.mobipurse.com/v1/checkouts' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: ***' \
+--data '{
+    "amount": 200000,
+    "country": "CI",
+    "currency": "XOF",
+    "webhookURL": "https://webhook.site/540ae29a-97bb-4090-8463-6bc64a9ac28e",
+    "redirectURL": "https://mobipurse.com"
+}'
+```
+
+
+## Best Practices
+
+1. **Always use webhooks**: Don't rely solely on redirect URLs, as users may close their browser before being redirected.
+
+2. **Store the checkout reference**: Save the reference returned from the checkout creation in your database to track the payment later.
+
+3. **Handle all payment statuses**: Be prepared to handle success, failure, and cancelled payment scenarios.
+
+4. **Test in sandbox first**: Always test your integration thoroughly in the sandbox environment before going live.
+
+5. **Implement idempotency**: Check if a payment has already been processed before fulfilling orders to avoid duplicate processing.
+
+6. **Set appropriate amounts**: Remember to use the lowest currency denomination (e.g., 200000 for 2000.00 XOF).
+
+## Currency & Country Codes
+
+Common currency and country code combinations:
+
+| Country       | Code | Currency | Example Amount       |
+|---------------|------|----------|----------------------|
+| Côte d'Ivoire | CI   | XOF      | 200000 (2000.00 XOF) |
+| Nigeria       | NG   | NGN      | 50000 (500.00 NGN)   |
+| Ghana         | GH   | GHS      | 10000 (100.00 GHS)   |
+| Kenya         | KE   | KES      | 100000 (1000.00 KES) |
+
+## Need Help?
+
+If you encounter any issues with the checkout integration:
+
+- 📧 Email: support@mobipurse.com
+- 💬 Contact us through your merchant dashboard
+- 📚 Browse our complete API documentation
+

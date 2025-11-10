@@ -1,0 +1,90 @@
+---
+title: "Mobipurse Disbursement"
+---
+Mobipurse Disbursements allows you to send money directly to your customers' mobile wallets. This is useful for payouts, refunds, commissions, or any scenario where you need to transfer funds to your users.
+
+## How It Works
+
+- From your infrastructure/application, call our Disbursements API with the recipient and payment details.
+- We will process the disbursement and send the funds to the recipient's mobile wallet.
+- You'll receive a webhook notification once the disbursement is completed or if it fails.
+
+## 1. Prepare the disbursement details
+
+First, you need to assemble the disbursement details. Here are the details you'll need:
+
+| Field         | Type   | Description                                                                                                                    | Required |
+|---------------|--------|--------------------------------------------------------------------------------------------------------------------------------|----------|
+| `amount`      | Number | The amount to disburse to the recipient. This should be in the lowest currency denomination (e.g., 10000 for 100.00)          | True     |
+| `phoneNumber` | String | The recipient's phone number in international format without the + sign (e.g., "2257038102473")                               | True     |
+| `currency`    | String | The currency in which you would like to disburse (e.g., "XOF", "USD", "NGN")                                                  | True     |
+| `country`     | String | The 2-character country code for the recipient's country (e.g., "CI" for Côte d'Ivoire, "NG" for Nigeria)                    | True     |
+| `reference`   | String | A unique reference code to identify this disbursement. This must be unique for every disbursement to prevent duplicate sends  | True     |
+| `webhookURL`  | String | A URL where we will send disbursement event notifications. Highly recommended for tracking disbursement status                | False    |
+
+## 2. Call the disbursements endpoint
+
+To initiate the disbursement, call our Disbursements API with the collected details. Ensure you authorize the API call using your `x-api-key` header.
+
+### API Endpoints
+
+**Sandbox (Testing):**
+[https://staging-api.mobipurse.com/v1/disbursements](https://staging-api.mobipurse.com/v1/disbursements)
+**Production:**
+[https://api.mobipurse.com/v1/disbursements](https://api.mobipurse.com/v1/disbursements)
+
+
+### Request Headers
+
+| Header              | Description                                           | Required |
+|---------------------|-------------------------------------------------------|----------|
+| `x-api-key`         | Your Mobipurse API key from the dashboard             | True     |
+
+### Example Request
+
+```shell
+curl --location 'https://staging-api.mobipurse.com/v1/disbursements' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: YOUR_API_KEY' \
+--data '{
+    "reference": "b712dd9e-6899-470c-b93d-761a10034c57",
+    "amount": 10000,
+    "phoneNumber": "2257038102473",
+    "country": "CI",
+    "currency": "XOF",
+    "webhookURL": "https://webhook.site/540ae29a-97bb-4090-8463-6bc64a9ac28e"
+}'
+```
+
+Response:
+```json
+{
+    "statusCode": 200,
+    "data": {
+        "reference": "DMBD20251110155014KVAZR",
+        "merchantsReference": "5f86ad3c-2d4a-401e-959c-3e0db463b175",
+        "amount": 10000,
+        "fee": 480,
+        "status": "success"
+    }
+}
+```
+
+## Currency & Country Codes
+
+Common currency and country code combinations:
+
+| Country       | Code | Currency | Example Amount       |
+|---------------|------|----------|----------------------|
+| Côte d'Ivoire | CI   | XOF      | 200000 (2000.00 XOF) |
+| Nigeria       | NG   | NGN      | 50000 (500.00 NGN)   |
+| Ghana         | GH   | GHS      | 10000 (100.00 GHS)   |
+| Kenya         | KE   | KES      | 100000 (1000.00 KES) |
+
+## Need Help?
+
+If you encounter any issues with the checkout integration:
+
+- 📧 Email: support@mobipurse.com
+- 💬 Contact us through your merchant dashboard
+- 📚 Browse our complete API documentation

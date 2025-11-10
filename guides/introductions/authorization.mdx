@@ -1,0 +1,54 @@
+# Authorization
+
+To interact with the Mobipurse API, you need to authenticate your requests. Authorization is required for all API calls to ensure the security and integrity of your payment transactions. Mobipurse uses industry-standard authentication mechanisms to protect your account and data.
+
+!> ❗️ Security
+!> We strongly advise that your API key should not be used on any frontend application or saved in any frontend application storage as it grants an attacker full access to your merchant account, data, and resources on the platform.
+
+## Account Creation
+
+You can create an account in any environment you want to work with. We advise you create a sandbox account for testing purposes only as it doesn't scale for production workload.
+
+To create your Mobipurse merchant account:
+
+1. Visit [https://staging-mobipurse-app.payfusion.io/](https://staging-mobipurse-app.payfusion.io/)
+2. Complete the registration process
+3. Send an email to **support@mobipurse.com** to request merchant activity activation
+4. Wait for confirmation from our team (typically 1-2 business days)
+
+## API Endpoints
+
+Mobipurse provides two environments for your integration:
+
+**Staging (Testing):**
+[https://staging-api.mobipurse.com](https://staging-api.mobipurse.com)
+
+**Production:**
+[https://api.mobipurse.com](https://api.mobipurse.com)
+
+
+## Generating Your API Key
+
+Once your merchant account is activated, you can generate your API key:
+
+1. Log in to your Mobipurse dashboard
+2. Navigate to **Settings** → **API Keys**
+3. Click **Generate API Key**
+4. Copy and securely store your API key immediately (it won't be shown again)
+5. For production use, generate a separate API key using the same process
+
+## Authorization
+
+Mobipurse uses API key authentication. Your API key acts as a secret token that authenticates your requests to the Mobipurse API.
+
+### Using Your API Key
+
+To authenticate your API requests, include your API key as an HTTP header using the `x-api-key` header name. This header must be included in all API requests.
+
+**Example using cURL:**
+
+```shell
+curl --request POST \
+  --url https://staging-api.mobipurse.com/v1/checkouts \
+  --header 'x-api-key: YOUR_API_KEY'
+```

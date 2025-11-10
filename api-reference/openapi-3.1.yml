@@ -1,0 +1,640 @@
+openapi: 3.0.3
+info:
+  title: Mobipurse API
+  description: |
+    Mobipurse is a universal wallet platform that enables merchants to accept payments and make disbursements to customers across any country.
+    
+    ## Authentication
+    All API requests require authentication using an API key. Include your API key in the `x-api-key` header.
+    
+    ## Environments
+    - **Staging**: `https://staging-api.mobipurse.com`
+    - **Production**: `https://api.mobipurse.com`
+    
+    ## Support
+    - Email: support@mobipurse.com
+    - Dashboard: https://mobipurse.com
+  version: 1.0.0
+  contact:
+    email: support@mobipurse.com
+
+servers:
+  - url: https://staging-api.mobipurse.com
+    description: Staging server
+  - url: https://api.mobipurse.com
+    description: Production server
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Checkouts
+    description: Operations for creating and managing payment checkouts
+  - name: Disbursements
+    description: Operations for making disbursements to recipients
+
+paths:
+  /v1/checkouts:
+    post:
+      tags:
+        - Checkouts
+      summary: Generate a checkout
+      description: |
+        Creates a new checkout session and returns a URL that you can redirect your customer to for payment.
+        The customer will be able to complete the payment using their Mobipurse wallet or other available payment methods.
+      operationId: createCheckout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutRequest'
+            examples:
+              basic:
+                summary: Basic checkout
+                value:
+                  amount: 200000
+                  country: "CI"
+                  currency: "XOF"
+                  webhookURL: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+                  redirectURL: "https://payfusion.io"
+      responses:
+        '200':
+          description: Checkout created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCheckoutResponse'
+              examples:
+                success:
+                  summary: Successful checkout creation
+                  value:
+                    statusCode: 200
+                    data:
+                      url: "https://staging-mobipurse-app.payfusion.io/checkouts/DMBC20251110154056OSPHM"
+                      reference: "DMBC20251110154056OSPHM"
+                      merchantsReference: "DMBC20251110154056OSPHM"
+                      amount: 200000
+                      fee: 9600
+                      status: "pending"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/checkouts/{reference}:
+    get:
+      tags:
+        - Checkouts
+      summary: Verify a checkout by reference
+      description: |
+        Retrieves the details and current status of a checkout using its reference.
+        This endpoint is useful for checking the payment status and retrieving customer information after a payment is completed.
+      operationId: verifyCheckout
+      parameters:
+        - name: reference
+          in: path
+          required: true
+          description: The unique reference of the checkout to verify
+          schema:
+            type: string
+          example: "DMBC20251110154056OSPHM"
+      responses:
+        '200':
+          description: Checkout details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyCheckoutResponse'
+              examples:
+                success:
+                  summary: Successful checkout verification
+                  value:
+                    statusCode: 200
+                    data:
+                      userId: "68fa3195501b6057c4d09f54"
+                      merchant:
+                        name: "Valerie Tremblay"
+                      country: "CI"
+                      currency: "XOF"
+                      amount: 200000
+                      fee: 9600
+                      webhookURL: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+                      redirectURL: "https://payfusion.io"
+                      reference: "DMBC20251110154056OSPHM"
+                      merchantsReference: "DMBC20251110154056OSPHM"
+                      status: "success"
+                      createdAt: "2025-11-10T15:40:56.754Z"
+                      updatedAt: "2025-11-10T15:41:15.263Z"
+                      customer:
+                        id: "69084137da4cde9706ab5c48"
+                        phoneNumber: "2250538102473"
+                        name: "Sample User"
+                      id: "69120788556412fad695d139"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/disbursements:
+    post:
+      tags:
+        - Disbursements
+      summary: Request a disbursement
+      description: |
+        Initiates a disbursement to send funds to a recipient's mobile wallet.
+        The disbursement will be processed and you'll receive the status immediately in the response.
+        Webhook notifications will be sent for any status changes.
+      operationId: createDisbursement
+      parameters:
+        - name: request-client-id
+          in: header
+          required: true
+          description: Client identifier
+          schema:
+            type: string
+            default: "iwallet"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDisbursementRequest'
+            examples:
+              basic:
+                summary: Basic disbursement
+                value:
+                  reference: "2a59004d-72a9-4bdc-9893-abff8fa6ffb4"
+                  amount: 10000
+                  phoneNumber: "2257038102473"
+                  country: "CI"
+                  currency: "XOF"
+                  webhookURL: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+      responses:
+        '200':
+          description: Disbursement created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDisbursementResponse'
+              examples:
+                success:
+                  summary: Successful disbursement creation
+                  value:
+                    statusCode: 200
+                    data:
+                      reference: "DMBD20251110155014KVAZR"
+                      merchantsReference: "5f86ad3c-2d4a-401e-959c-3e0db463b175"
+                      amount: 10000
+                      fee: 480
+                      status: "success"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/disbursements/{reference}:
+    get:
+      tags:
+        - Disbursements
+      summary: Verify a disbursement by reference
+      description: |
+        Retrieves the details and current status of a disbursement using its reference.
+        This endpoint is useful for checking the disbursement status and retrieving customer information.
+      operationId: verifyDisbursement
+      parameters:
+        - name: request-client-id
+          in: header
+          required: true
+          description: Client identifier
+          schema:
+            type: string
+            default: "iwallet"
+        - name: reference
+          in: path
+          required: true
+          description: The unique reference of the disbursement to verify
+          schema:
+            type: string
+          example: "DMBD20251110155014KVAZR"
+      responses:
+        '200':
+          description: Disbursement details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyDisbursementResponse'
+              examples:
+                success:
+                  summary: Successful disbursement verification
+                  value:
+                    statusCode: 200
+                    data:
+                      userId: "68fa3195501b6057c4d09f54"
+                      merchant:
+                        name: "Valerie Tremblay"
+                      customer:
+                        id: "68e47c6d8169d0c6e42e0638"
+                        name: "Cordell Deckow"
+                        phoneNumber: "2257038102473"
+                      country: "CI"
+                      currency: "XOF"
+                      amount: 10000
+                      fee: 480
+                      webhookURL: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+                      reference: "DMBD20251110155014KVAZR"
+                      merchantsReference: "5f86ad3c-2d4a-401e-959c-3e0db463b175"
+                      status: "success"
+                      createdAt: "2025-11-10T15:50:15.006Z"
+                      updatedAt: "2025-11-10T15:50:15.006Z"
+                      id: "691209b7556412fad695d14c"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key for authentication. Generate this from your Mobipurse dashboard under Settings → API Keys.
+
+  schemas:
+    CreateCheckoutRequest:
+      type: object
+      required:
+        - amount
+        - country
+        - currency
+      properties:
+        amount:
+          type: integer
+          description: The amount to charge in the lowest currency denomination (e.g., 200000 for 2000.00)
+          example: 200000
+          minimum: 1
+        country:
+          type: string
+          description: The 2-character ISO country code
+          example: "CI"
+          pattern: "^[A-Z]{2}$"
+        currency:
+          type: string
+          description: The 3-character ISO currency code
+          example: "XOF"
+          pattern: "^[A-Z]{3}$"
+        webhookURL:
+          type: string
+          format: uri
+          description: URL to receive webhook notifications for payment events
+          example: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+        redirectURL:
+          type: string
+          format: uri
+          description: URL to redirect the customer after payment completion
+          example: "https://payfusion.io"
+
+    CreateCheckoutResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        data:
+          type: object
+          properties:
+            url:
+              type: string
+              format: uri
+              description: The checkout URL to redirect the customer to
+              example: "https://staging-mobipurse-app.payfusion.io/checkouts/DMBC20251110154056OSPHM"
+            reference:
+              type: string
+              description: Unique reference generated by Mobipurse
+              example: "DMBC20251110154056OSPHM"
+            merchantsReference:
+              type: string
+              description: Merchant's reference for the checkout
+              example: "DMBC20251110154056OSPHM"
+            amount:
+              type: integer
+              description: The checkout amount
+              example: 200000
+            fee:
+              type: integer
+              description: The transaction fee
+              example: 9600
+            status:
+              type: string
+              enum: [pending, success, failed]
+              description: Current status of the checkout
+              example: "pending"
+
+    VerifyCheckoutResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Unique identifier for the checkout
+              example: "69120788556412fad695d139"
+            userId:
+              type: string
+              description: Merchant's user ID
+              example: "68fa3195501b6057c4d09f54"
+            merchant:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Valerie Tremblay"
+            country:
+              type: string
+              example: "CI"
+            currency:
+              type: string
+              example: "XOF"
+            amount:
+              type: integer
+              example: 200000
+            fee:
+              type: integer
+              example: 9600
+            webhookURL:
+              type: string
+              format: uri
+              example: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+            redirectURL:
+              type: string
+              format: uri
+              example: "https://payfusion.io"
+            reference:
+              type: string
+              example: "DMBC20251110154056OSPHM"
+            merchantsReference:
+              type: string
+              example: "DMBC20251110154056OSPHM"
+            status:
+              type: string
+              enum: [pending, success, failed]
+              example: "success"
+            customer:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: "69084137da4cde9706ab5c48"
+                phoneNumber:
+                  type: string
+                  example: "2250538102473"
+                name:
+                  type: string
+                  example: "Sample User"
+            createdAt:
+              type: string
+              format: date-time
+              example: "2025-11-10T15:40:56.754Z"
+            updatedAt:
+              type: string
+              format: date-time
+              example: "2025-11-10T15:41:15.263Z"
+
+    CreateDisbursementRequest:
+      type: object
+      required:
+        - reference
+        - amount
+        - phoneNumber
+        - country
+        - currency
+      properties:
+        reference:
+          type: string
+          description: Unique merchant reference for the disbursement. Must be unique for each disbursement.
+          example: "2a59004d-72a9-4bdc-9893-abff8fa6ffb4"
+        amount:
+          type: integer
+          description: The amount to disburse in the lowest currency denomination (e.g., 10000 for 100.00)
+          example: 10000
+          minimum: 1
+        phoneNumber:
+          type: string
+          description: Recipient's phone number in international format without the + sign
+          example: "2257038102473"
+          pattern: "^[0-9]{10,15}$"
+        country:
+          type: string
+          description: The 2-character ISO country code
+          example: "CI"
+          pattern: "^[A-Z]{2}$"
+        currency:
+          type: string
+          description: The 3-character ISO currency code
+          example: "XOF"
+          pattern: "^[A-Z]{3}$"
+        webhookURL:
+          type: string
+          format: uri
+          description: URL to receive webhook notifications for disbursement events
+          example: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+
+    CreateDisbursementResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference generated by Mobipurse
+              example: "DMBD20251110155014KVAZR"
+            merchantsReference:
+              type: string
+              description: Merchant's reference for the disbursement
+              example: "5f86ad3c-2d4a-401e-959c-3e0db463b175"
+            amount:
+              type: integer
+              description: The disbursement amount
+              example: 10000
+            fee:
+              type: integer
+              description: The transaction fee
+              example: 480
+            status:
+              type: string
+              enum: [pending, success, failed]
+              description: Current status of the disbursement
+              example: "success"
+
+    VerifyDisbursementResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Unique identifier for the disbursement
+              example: "691209b7556412fad695d14c"
+            userId:
+              type: string
+              description: Merchant's user ID
+              example: "68fa3195501b6057c4d09f54"
+            merchant:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Valerie Tremblay"
+            customer:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: "68e47c6d8169d0c6e42e0638"
+                name:
+                  type: string
+                  example: "Cordell Deckow"
+                phoneNumber:
+                  type: string
+                  example: "2257038102473"
+            country:
+              type: string
+              example: "CI"
+            currency:
+              type: string
+              example: "XOF"
+            amount:
+              type: integer
+              example: 10000
+            fee:
+              type: integer
+              example: 480
+            webhookURL:
+              type: string
+              format: uri
+              example: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
+            reference:
+              type: string
+              example: "DMBD20251110155014KVAZR"
+            merchantsReference:
+              type: string
+              example: "5f86ad3c-2d4a-401e-959c-3e0db463b175"
+            status:
+              type: string
+              enum: [pending, success, failed]
+              example: "success"
+            createdAt:
+              type: string
+              format: date-time
+              example: "2025-11-10T15:50:15.006Z"
+            updatedAt:
+              type: string
+              format: date-time
+              example: "2025-11-10T15:50:15.006Z"
+
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Invalid request parameters"
+        error:
+          type: string
+          example: "Bad Request"
+
+  responses:
+    BadRequest:
+      description: Bad request - Invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 400
+            message: "Invalid request parameters"
+            error: "Bad Request"
+
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 401
+            message: "Invalid API key"
+            error: "Unauthorized"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 404
+            message: "Resource not found"
+            error: "Not Found"
+
+    Conflict:
+      description: Conflict - Duplicate reference
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 409
+            message: "A disbursement with this reference already exists"
+            error: "Conflict"
+
+    UnprocessableEntity:
+      description: Unprocessable entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 422
+            message: "Invalid phone number format"
+            error: "Unprocessable Entity"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 500
+            message: "An unexpected error occurred"
+            error: "Internal Server Error"
