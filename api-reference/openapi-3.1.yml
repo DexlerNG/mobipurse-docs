@@ -56,6 +56,7 @@ paths:
                   amount: 200000
                   country: "CI"
                   currency: "XOF"
+                  locale: "fr"
                   webhookURL: "https://webhook.site/100ebe83-961d-4096-8741-05772dafcfa1"
                   redirectURL: "https://mobipurse.com"
       responses:
@@ -298,6 +299,16 @@ components:
           description: The 3-character ISO currency code
           example: "XOF"
           pattern: "^[A-Z]{3}$"
+        reference:
+          type: string
+          description: Unique merchant reference for the checkout. Must be unique for each checkout.
+          example: "2a59004d-72a9-4bdc-9893-abff8fa6ffb4"
+        locale:
+          type: string
+          description: Locale of the checkout page. Defaults to 'en' if not specified.
+          example:
+            - "en"
+            - "fr"
         webhookURL:
           type: string
           format: uri
