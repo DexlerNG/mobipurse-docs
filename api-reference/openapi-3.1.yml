@@ -153,14 +153,6 @@ paths:
         The disbursement will be processed and you'll receive the status immediately in the response.
         Webhook notifications will be sent for any status changes.
       operationId: createDisbursement
-      parameters:
-        - name: request-client-id
-          in: header
-          required: true
-          description: Client identifier
-          schema:
-            type: string
-            default: "iwallet"
       requestBody:
         required: true
         content:
@@ -216,13 +208,6 @@ paths:
         This endpoint is useful for checking the disbursement status and retrieving customer information.
       operationId: verifyDisbursement
       parameters:
-        - name: request-client-id
-          in: header
-          required: true
-          description: Client identifier
-          schema:
-            type: string
-            default: "iwallet"
         - name: reference
           in: path
           required: true
